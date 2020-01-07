@@ -2,146 +2,18 @@
 <html>
 
 <head>
-<style>
-*{box-sizing:border-box;-moz-box-sizing:border-box;-webkit-box-sizing:border-box;}html,body{height:100%;font-size:0;}body{background-color:#fff;font-family:Arial,sans-serif;margin:0;padding:10px 10px 10px 7px;}@media only screen and (min-width:0){.content,.msg{font-size:14px;}}@media only screen and (min-width:992px){.content,.msg{font-size:14.5px;}}@media only screen and (min-width:1200px){.content,.msg{font-size:15px;}}.clearfix{clear:both;}.hide{display:none!important;}.content{margin-top:40px;min-height:calc(100% - 65px);}.search-bar{position:fixed;width:calc(100% - 17px);left:7px;top:10px;}.search-control{width:100%;height:38px;line-height:38px;border:1px solid #E0E0E0;outline:none;font-size:15px;color:#757575;padding:0 35px 0 5px;border-radius:3px;}.search-control:focus{box-shadow:0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12);}.search.icon{color:#000;position:absolute;right:20px;top:12px;width:12px;height:12px;border:solid 1px #9E9E9E;border-radius:100%;-webkit-transform:rotate(-45deg);transform:rotate(-45deg);}.search.icon:before{content:'';position:absolute;top:12px;left:5px;height:6px;width:1px;background-color:#9E9E9E;}.table{display:table;border-collapse:collapse;min-width:30%;}.table-caption{display:table-caption;border:none;padding:15px 5px 5px 5px;text-align:left;vertical-align:middle;font-weight:bold;}.table-row-group{display:table-row-group;}.table-row{/*display:table-row;*/}.table-row .table-cell:first-child,.table.clue .table-row .table-cell:nth-child(2){white-space:nowrap;vertical-align:top;}.table-cell{display:table-cell;padding:5px;text-align:left;vertical-align:middle;}.chapter-header .table-cell{padding-top:10px;font-weight:bolder;}.table-row.chapter-header{border-bottom:1px solid #d0d0d0;}span.light{color:#dd4b39;}.msg{color:#a94442;padding:50px 15px;margin-top: 60px;border:1px solid transparent;border-radius:4px;background-color:#f2dede;border-color:#ebccd1;}footer{padding:5px;text-align:center;}footer a{color:#787a7d;font-size:12px;line-height:21px;}footer a:hover{text-decoration:underline;}.suggest{text-decoration:none;position:absolute;left:10px;}.copy-right{color:#787a7d;font-size:12px;line-height:21px;}em.mode{color:#ff0000;}
-</style>
-<script language="javascript">
-function search(matchValue) {
-	var searchStr = matchValue || document.querySelector("#searchItem").value,
-		cellList = document.querySelectorAll(".content .table > .table-row-group > .table-row > .table-cell");
-	if (searchStr.indexOf('*') > -1 || searchStr.indexOf('x') > -1) {
-		searchStr = searchStr.split('*').join('×').split('x').join('×')
-	}
-	removeChildNodesHide(document.querySelector(".content"));
-	resetLightFont();
-	if (searchStr && searchStr.trim()) {
-		var searchStrArray = searchClue(searchStr.trim());
-		displayCell(searchStrArray, cellList);
-	}
-}
-function searchClue(searchStr) {
-	var searchStrArray = [searchStr],
-		clueCellList = document.querySelectorAll(".content .table.clue > .table-row-group > .table-row > .table-cell.clue-cell");
-	for (var cu = 0; cu < clueCellList.length; cu++) {
-		var $currentClueCell = clueCellList[cu],
-			clueHTML = $currentClueCell.innerHTML;
-		if (clueHTML.indexOf(searchStr) > -1) {
-			var clueValue = $currentClueCell.parentNode.querySelectorAll(".table-cell")[1].innerHTML;
-			if (searchStrArray.indexOf(clueValue) == -1) {
-				searchStrArray.push(clueValue)
-			}
-		}
-	}
-	return searchStrArray
-}
-function displayCell(searchStrArray, cellList) {
-	for (var i = 0; i < cellList.length; i++) {
-		var $currentCell = cellList[i],
-			innerHTML = $currentCell.innerHTML,
-			matchResult = indexOfArray(innerHTML, searchStrArray);
-		if (matchResult.result) {
-			$currentCell.classList.remove("hide");
-			for (var ma = 0; ma < matchResult.matchArray.length; ma++) {
-				var matchStr = matchResult.matchArray[ma],
-					lightHtml = "<span class='light'>" + matchStr + "</span>";
-				$currentCell.innerHTML = innerHTML.split(matchStr).join(lightHtml);
-			}
-		} else if ($currentCell.querySelectorAll("span.light").length == 0) {
-			$currentCell.classList.add("hide");
-		}
-	}
-	displayChapter()
-}
-var xxx =0;
-function displayChapter() {
-	var tableList = document.querySelectorAll(".content .table");
-	for (var t = 0; t < tableList.length; t++) {
-		var $currentTable = tableList[t],
-			groupList = $currentTable.querySelectorAll(".table-row-group");
-		for (var g = 0; g < groupList.length; g++) {
-			var $currentGroup = groupList[g],
-				rowList = $currentGroup.querySelectorAll(".table-row");
-			for (var r = 0; r < rowList.length; r++) {
-				var $currentRow = rowList[r];
-				if ($currentRow.querySelectorAll(".table-cell:not(.hide)").length == 0) {
-					$currentRow.classList.add("hide");
-				} else {
-					$currentRow.classList.remove("hide");
-					removeChildNodesHide($currentRow)
-				}
-			}
-			if ($currentGroup.querySelectorAll(".table-row:not(.hide)").length == 0) {
-				$currentGroup.classList.add("hide");
-			} else {
-				$currentGroup.classList.remove("hide");
-				var $currentGroupHeader = $currentGroup.querySelector(".table-row.chapter-header"),
-					$currentGroupContent = $currentGroup.querySelectorAll(".table-row:not(.chapter-header)");
-				if ($currentGroupHeader.classList.contains("hide") && $currentGroupContent[0].querySelectorAll(".table-cell")[0].innerHTML.indexOf("回合") == -1) {
-					$currentGroupHeader.classList.remove("hide");
-					removeChildNodesHide($currentGroupHeader)
-				} else {
-					for (var rr = 0; rr < rowList.length; rr++) {
-						var $currentRow = rowList[rr];
-						$currentRow.classList.remove("hide");
-						removeChildNodesHide($currentRow)
-					}
-				}
-			}
-		}
-		if ($currentTable.querySelectorAll(".table-row-group:not(.hide)").length == 0) {
-			$currentTable.classList.add("hide")
-		} else {
-			$currentTable.classList.remove("hide")
-		}
-	}
-}
-function removeChildNodesHide(element) {
-	var childNodes = element.querySelectorAll(".hide:not(.msg)");
-	for (var n = 0; n < childNodes.length; n++) {
-		childNodes[n].classList.remove("hide")
-	}
-}
-function resetLightFont() {
-	var lights = document.querySelectorAll("span.light");
-	for (var l = 0; l < lights.length; l++) {
-		var $currentLight = lights[l];
-		$currentLight.outerHTML = $currentLight.innerHTML
-	}
-}
-function indexOfArray(str, array) {
-	var matchResult = {
-		"result": false,
-		"matchArray": []
-	};
-	for (var i = 0; i < array.length; i++) {
-		if (str.indexOf(array[i]) > -1) {
-			matchResult.result = true;
-			matchResult.matchArray.push(array[i])
-		}
-	}
-	return matchResult
-}
-function listContainsStr(list, str) {
-	var contains = false;
-	for (var i = 0; i < list.length; i++) {
-		var item = list[i];
-		if (str.indexOf(item) > -1) {
-			contains = true
-		}
-	}
-	return contains
-}
-</script>
+<link href="onmyojiSearch.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="onmyojiSearch.js"></script> 
 
 	<meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
   	<meta name="robots" content="noindex,nofollow">
 	<meta name="title" content="悬赏封印">
 	<meta name="keywords" content="悬赏封印,阴阳师妖怪出处,阴阳师神秘妖怪,阴阳师探索副本,阴阳师御魂副本,阴阳师妖气封印,阴阳师神秘线索">
 	<meta name="description" content="此站点为大家提供手游阴阳师的探索副本、御魂副本、妖气封印、神秘线索等场景的怪物出处及数量，方便您快速省体力的完成悬赏封印任务。">
 	<title>悬赏封印查询助手</title>
 	
-	<link href="css/main.min.css" rel="stylesheet" type="text/css">
+	
 </head>
 <body>
 	<div class="search-bar">
