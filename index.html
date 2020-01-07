@@ -1,0 +1,5518 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<style>
+*{box-sizing:border-box;-moz-box-sizing:border-box;-webkit-box-sizing:border-box;}html,body{height:100%;font-size:0;}body{background-color:#fff;font-family:Arial,sans-serif;margin:0;padding:10px 10px 10px 7px;}@media only screen and (min-width:0){.content,.msg{font-size:14px;}}@media only screen and (min-width:992px){.content,.msg{font-size:14.5px;}}@media only screen and (min-width:1200px){.content,.msg{font-size:15px;}}.clearfix{clear:both;}.hide{display:none!important;}.content{margin-top:40px;min-height:calc(100% - 65px);}.search-bar{position:fixed;width:calc(100% - 17px);left:7px;top:10px;}.search-control{width:100%;height:38px;line-height:38px;border:1px solid #E0E0E0;outline:none;font-size:15px;color:#757575;padding:0 35px 0 5px;border-radius:3px;}.search-control:focus{box-shadow:0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12);}.search.icon{color:#000;position:absolute;right:20px;top:12px;width:12px;height:12px;border:solid 1px #9E9E9E;border-radius:100%;-webkit-transform:rotate(-45deg);transform:rotate(-45deg);}.search.icon:before{content:'';position:absolute;top:12px;left:5px;height:6px;width:1px;background-color:#9E9E9E;}.table{display:table;border-collapse:collapse;min-width:30%;}.table-caption{display:table-caption;border:none;padding:15px 5px 5px 5px;text-align:left;vertical-align:middle;font-weight:bold;}.table-row-group{display:table-row-group;}.table-row{/*display:table-row;*/}.table-row .table-cell:first-child,.table.clue .table-row .table-cell:nth-child(2){white-space:nowrap;vertical-align:top;}.table-cell{display:table-cell;padding:5px;text-align:left;vertical-align:middle;}.chapter-header .table-cell{padding-top:10px;font-weight:bolder;}.table-row.chapter-header{border-bottom:1px solid #d0d0d0;}span.light{color:#dd4b39;}.msg{color:#a94442;padding:50px 15px;margin-top: 60px;border:1px solid transparent;border-radius:4px;background-color:#f2dede;border-color:#ebccd1;}footer{padding:5px;text-align:center;}footer a{color:#787a7d;font-size:12px;line-height:21px;}footer a:hover{text-decoration:underline;}.suggest{text-decoration:none;position:absolute;left:10px;}.copy-right{color:#787a7d;font-size:12px;line-height:21px;}em.mode{color:#ff0000;}
+</style>
+<script language="javascript">
+function search(matchValue) {
+	var searchStr = matchValue || document.querySelector("#searchItem").value,
+		cellList = document.querySelectorAll(".content .table > .table-row-group > .table-row > .table-cell");
+	if (searchStr.indexOf('*') > -1 || searchStr.indexOf('x') > -1) {
+		searchStr = searchStr.split('*').join('×').split('x').join('×')
+	}
+	removeChildNodesHide(document.querySelector(".content"));
+	resetLightFont();
+	if (searchStr && searchStr.trim()) {
+		var searchStrArray = searchClue(searchStr.trim());
+		displayCell(searchStrArray, cellList);
+	}
+}
+function searchClue(searchStr) {
+	var searchStrArray = [searchStr],
+		clueCellList = document.querySelectorAll(".content .table.clue > .table-row-group > .table-row > .table-cell.clue-cell");
+	for (var cu = 0; cu < clueCellList.length; cu++) {
+		var $currentClueCell = clueCellList[cu],
+			clueHTML = $currentClueCell.innerHTML;
+		if (clueHTML.indexOf(searchStr) > -1) {
+			var clueValue = $currentClueCell.parentNode.querySelectorAll(".table-cell")[1].innerHTML;
+			if (searchStrArray.indexOf(clueValue) == -1) {
+				searchStrArray.push(clueValue)
+			}
+		}
+	}
+	return searchStrArray
+}
+function displayCell(searchStrArray, cellList) {
+	for (var i = 0; i < cellList.length; i++) {
+		var $currentCell = cellList[i],
+			innerHTML = $currentCell.innerHTML,
+			matchResult = indexOfArray(innerHTML, searchStrArray);
+		if (matchResult.result) {
+			$currentCell.classList.remove("hide");
+			for (var ma = 0; ma < matchResult.matchArray.length; ma++) {
+				var matchStr = matchResult.matchArray[ma],
+					lightHtml = "<span class='light'>" + matchStr + "</span>";
+				$currentCell.innerHTML = innerHTML.split(matchStr).join(lightHtml);
+			}
+		} else if ($currentCell.querySelectorAll("span.light").length == 0) {
+			$currentCell.classList.add("hide");
+		}
+	}
+	displayChapter()
+}
+var xxx =0;
+function displayChapter() {
+	var tableList = document.querySelectorAll(".content .table");
+	for (var t = 0; t < tableList.length; t++) {
+		var $currentTable = tableList[t],
+			groupList = $currentTable.querySelectorAll(".table-row-group");
+		for (var g = 0; g < groupList.length; g++) {
+			var $currentGroup = groupList[g],
+				rowList = $currentGroup.querySelectorAll(".table-row");
+			for (var r = 0; r < rowList.length; r++) {
+				var $currentRow = rowList[r];
+				if ($currentRow.querySelectorAll(".table-cell:not(.hide)").length == 0) {
+					$currentRow.classList.add("hide");
+				} else {
+					$currentRow.classList.remove("hide");
+					removeChildNodesHide($currentRow)
+				}
+			}
+			if ($currentGroup.querySelectorAll(".table-row:not(.hide)").length == 0) {
+				$currentGroup.classList.add("hide");
+			} else {
+				$currentGroup.classList.remove("hide");
+				var $currentGroupHeader = $currentGroup.querySelector(".table-row.chapter-header"),
+					$currentGroupContent = $currentGroup.querySelectorAll(".table-row:not(.chapter-header)");
+				if ($currentGroupHeader.classList.contains("hide") && $currentGroupContent[0].querySelectorAll(".table-cell")[0].innerHTML.indexOf("回合") == -1) {
+					$currentGroupHeader.classList.remove("hide");
+					removeChildNodesHide($currentGroupHeader)
+				} else {
+					for (var rr = 0; rr < rowList.length; rr++) {
+						var $currentRow = rowList[rr];
+						$currentRow.classList.remove("hide");
+						removeChildNodesHide($currentRow)
+					}
+				}
+			}
+		}
+		if ($currentTable.querySelectorAll(".table-row-group:not(.hide)").length == 0) {
+			$currentTable.classList.add("hide")
+		} else {
+			$currentTable.classList.remove("hide")
+		}
+	}
+}
+function removeChildNodesHide(element) {
+	var childNodes = element.querySelectorAll(".hide:not(.msg)");
+	for (var n = 0; n < childNodes.length; n++) {
+		childNodes[n].classList.remove("hide")
+	}
+}
+function resetLightFont() {
+	var lights = document.querySelectorAll("span.light");
+	for (var l = 0; l < lights.length; l++) {
+		var $currentLight = lights[l];
+		$currentLight.outerHTML = $currentLight.innerHTML
+	}
+}
+function indexOfArray(str, array) {
+	var matchResult = {
+		"result": false,
+		"matchArray": []
+	};
+	for (var i = 0; i < array.length; i++) {
+		if (str.indexOf(array[i]) > -1) {
+			matchResult.result = true;
+			matchResult.matchArray.push(array[i])
+		}
+	}
+	return matchResult
+}
+function listContainsStr(list, str) {
+	var contains = false;
+	for (var i = 0; i < list.length; i++) {
+		var item = list[i];
+		if (str.indexOf(item) > -1) {
+			contains = true
+		}
+	}
+	return contains
+}
+</script>
+
+	<meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+  	<meta name="robots" content="noindex,nofollow">
+	<meta name="title" content="悬赏封印">
+	<meta name="keywords" content="悬赏封印,阴阳师妖怪出处,阴阳师神秘妖怪,阴阳师探索副本,阴阳师御魂副本,阴阳师妖气封印,阴阳师神秘线索">
+	<meta name="description" content="此站点为大家提供手游阴阳师的探索副本、御魂副本、妖气封印、神秘线索等场景的怪物出处及数量，方便您快速省体力的完成悬赏封印任务。">
+	<title>悬赏封印查询助手(离线版)</title>
+	
+	<link href="css/main.min.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+	<div class="search-bar">
+		<input class='search-control' placeholder='输入线索或者妖怪名字' id="searchItem" oninput="search()"></input>
+		<span class="icon search"></span>
+	</div>
+	<div class="content">
+		<div class="table explore">
+			<div class="table-caption">【探索副本】</div>
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第一章 雀食奇谭</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">天邪鬼绿1</div>
+					<div class="table-cell">天邪鬼绿×1  灯笼鬼×2（普通模式）</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">天邪鬼绿1</div>
+					<div class="table-cell">天邪鬼绿×1  跳跳犬×2（困难模式）</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">天邪鬼绿2</div>
+					<div class="table-cell">天邪鬼绿×1 提灯小僧×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">提灯小僧1</div>
+					<div class="table-cell">天邪鬼绿×2  提灯小僧×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">提灯小僧2</div>
+					<div class="table-cell">提灯小僧×1 灯笼鬼×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">首领：九命猫</div>
+					<div class="table-cell">九命猫×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：天邪鬼绿</div>
+					<div class="table-cell">天邪鬼绿×14</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：九命猫</div>
+					<div class="table-cell">九命猫×14</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第二章 幸福的彼岸</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">帚神</div>
+					<div class="table-cell">盗墓小鬼×1 寄生魂×1 帚神×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">盗墓小鬼1</div>
+					<div class="table-cell">盗墓小鬼×1 寄生魂×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">盗墓小鬼2</div>
+					<div class="table-cell">盗墓小鬼×1 灯笼鬼×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">寄生魂1</div>
+					<div class="table-cell">寄生魂×1 灯笼鬼×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">寄生魂2</div>
+					<div class="table-cell">盗墓小鬼×2 寄生魂×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">首领：座敷童子</div>
+					<div class="table-cell">座敷童子×1 天邪鬼绿×2 天邪鬼青×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：提灯小僧</div>
+					<div class="table-cell">提灯小僧×14</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：座敷童子</div>
+					<div class="table-cell">座敷童子×14</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第三章 凤凰林的占卜师</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">天邪鬼黄1</div>
+					<div class="table-cell">天邪鬼黄×1 帚神×2 涂壁×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">天邪鬼黄2</div>
+					<div class="table-cell">天邪鬼黄×1 童女×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">赤舌1</div>
+					<div class="table-cell">赤舌×1 提灯小僧×1 灯笼鬼×2 ；二回合 - 鸦天狗×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">赤舌2</div>
+					<div class="table-cell">赤舌×1 天邪鬼黄×1 童女×2；二回合 - 鸦天狗×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">兵俑1</div>
+					<div class="table-cell">兵俑×1 提灯小僧×1 童女×2（普通模式）</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">兵俑1</div>
+					<div class="table-cell">兵俑×1 提灯小僧×2 童女×1（困难模式）</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">兵俑2</div>
+					<div class="table-cell">兵俑×1 提灯小僧×1 灯笼鬼×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">首领：凤凰火</div>
+					<div class="table-cell">凤凰火×1  寄生魂×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：天邪鬼黄</div>
+					<div class="table-cell">天邪鬼黄×14</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：铁鼠</div>
+					<div class="table-cell">铁鼠×14</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：三尾狐</div>
+					<div class="table-cell">三尾狐×14</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第四章 桥上的雨女</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">帚神1</div>
+					<div class="table-cell">帚神×1 涂壁×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">帚神2</div>
+					<div class="table-cell">帚神×1  涂壁x1 唐纸伞妖×2（普通模式）</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">帚神2</div>
+					<div class="table-cell">帚神×1 唐纸伞妖×3（困难模式）</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">唐纸伞妖1</div>
+					<div class="table-cell">唐纸伞妖×1 天邪鬼赤×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">唐纸伞妖2</div>
+					<div class="table-cell">唐纸伞妖×1 天邪鬼赤×1 涂壁×2（普通模式）</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">唐纸伞妖2</div>
+					<div class="table-cell">唐纸伞妖×1  涂壁×3（困难模式）</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">天邪鬼赤1</div>
+					<div class="table-cell">天邪鬼赤×1 唐纸伞妖×1 涂壁×2（普通模式）</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">天邪鬼赤1</div>
+					<div class="table-cell">天邪鬼赤×1  涂壁×3（困难模式）</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">天邪鬼赤2</div>
+					<div class="table-cell">天邪鬼赤×1 唐纸伞妖×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">首领：雨女</div>
+					<div class="table-cell">雨女×1 青蛙瓷器×1 帚神×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：雨女</div>
+					<div class="table-cell">雨女×14</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：青蛙瓷器</div>
+					<div class="table-cell">青蛙瓷器×14</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：管狐</div>
+					<div class="table-cell">管狐×14</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第五章 黑夜山的食发鬼</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">涂壁1</div>
+					<div class="table-cell">涂壁×1  天邪鬼赤×2 黑豹×1（普通模式）</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">涂壁1</div>
+					<div class="table-cell">涂壁×1  天邪鬼赤×2（困难模式）</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">涂壁2</div>
+					<div class="table-cell">涂壁×1 天邪鬼赤×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">帚神1</div>
+					<div class="table-cell">帚神×1 天邪鬼赤×1 涂壁×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">帚神2</div>
+					<div class="table-cell">帚神×1 天邪鬼赤×1 天邪鬼黄×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">管狐1</div>
+					<div class="table-cell">管狐×2 天邪鬼黄×2；二回合 - 寄生魂×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">管狐2</div>
+					<div class="table-cell">管狐×1 天邪鬼绿×3；二回合 - 寄生魂×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">首领：食发鬼</div>
+					<div class="table-cell">食发鬼×1 灯笼鬼×1 天邪鬼青×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：帚神</div>
+					<div class="table-cell">帚神×14</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：食发鬼</div>
+					<div class="table-cell">食发鬼×14</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第六章 似梦非梦</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">灯笼鬼</div>
+					<div class="table-cell">灯笼鬼×1 帚神×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">天邪鬼青</div>
+					<div class="table-cell">天邪鬼青×1 天邪鬼绿×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">蝴蝶精</div>
+					<div class="table-cell">蝴蝶精×1 涂壁×1 天邪鬼赤×2；二回合 - 三尾狐×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">首领：巫蛊师</div>
+					<div class="table-cell">巫蛊师×1 天邪鬼绿×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：灯笼鬼</div>
+					<div class="table-cell">灯笼鬼×14</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：巫蛊师</div>
+					<div class="table-cell">巫蛊师×14</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：蝴蝶精</div>
+					<div class="table-cell">蝴蝶精×14</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第七章 恋上鲤的美</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">鲤鱼精1</div>
+					<div class="table-cell">鲤鱼精×3 帚神×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">鲤鱼精2</div>
+					<div class="table-cell">鲤鱼精×1 帚神×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">河童1</div>
+					<div class="table-cell">河童×1 鲤鱼精×1 涂壁×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">河童2</div>
+					<div class="table-cell">河童×1 灯笼鬼×1 跳跳犬×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">提灯小僧1</div>
+					<div class="table-cell">提灯小僧×1 跳跳犬×3；二回合 - 管狐×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">提灯小僧2</div>
+					<div class="table-cell">提灯小僧×1 跳跳犬×3；二回合 - 管狐×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">提灯小僧3</div>
+					<div class="table-cell">提灯小僧×1 跳跳犬×1 鲤鱼精×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">首领：妖狐</div>
+					<div class="table-cell">妖狐×1 涂壁×1 座敷童子×2；二回合 - 妖狐×1 寄生魂×1 天邪鬼赤×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：天邪鬼赤</div>
+					<div class="table-cell">天邪鬼赤×14</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：鲤鱼精</div>
+					<div class="table-cell">鲤鱼精×14</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：河童</div>
+					<div class="table-cell">河童×14</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第八章 樱与桃</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">唐纸伞妖1</div>
+					<div class="table-cell">唐纸伞妖×1 帚神×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">唐纸伞妖2</div>
+					<div class="table-cell">唐纸伞妖×1 山童×1 帚神×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">樱花妖1</div>
+					<div class="table-cell">樱花妖×1 帚神×1 涂壁×2；二回合 - 雪女×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">樱花妖2</div>
+					<div class="table-cell">樱花妖×1 涂壁×3；二回合 - 雪女×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">天邪鬼绿</div>
+					<div class="table-cell">天邪鬼绿×1 天邪鬼青×1 天邪鬼黄×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">首领：桃花妖</div>
+					<div class="table-cell">樱花妖×1 天邪鬼青×1 提灯小僧×2；二回合 - 桃花妖×1 帚神×1 蝴蝶精×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：唐纸伞妖</div>
+					<div class="table-cell">唐纸伞妖×14</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：桃花妖</div>
+					<div class="table-cell">桃花妖×14</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第九章 兔蛙茶和锅</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">提灯小僧1</div>
+					<div class="table-cell">提灯小僧×1 灯笼鬼×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">提灯小僧2</div>
+					<div class="table-cell">提灯小僧×1 灯笼鬼×1 铁鼠×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">铁鼠1</div>
+					<div class="table-cell">铁鼠×1 帚神×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">铁鼠2</div>
+					<div class="table-cell">铁鼠×2 帚神×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">山兔1</div>
+					<div class="table-cell">山兔×4；二回合 - 鸦天狗×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">山兔2</div>
+					<div class="table-cell">山兔×3 铁鼠×1；二回合 - 鸦天狗×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">首领：孟婆</div>
+					<div class="table-cell">孟婆×1 饿鬼×3；二回合 - 孟婆×1 灯笼鬼×1 鸦天狗×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：天邪鬼青</div>
+					<div class="table-cell">天邪鬼青×14</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：山兔</div>
+					<div class="table-cell">山兔×14</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第十章 鬼为谁买醉</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">丑时之女</div>
+					<div class="table-cell">丑时之女×1 傀儡师×1 天邪鬼青×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">傀儡师1</div>
+					<div class="table-cell">傀儡师×1 觉×1 狸猫×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">傀儡师2</div>
+					<div class="table-cell">傀儡师×1 觉×1 座敷童子×2；二回合 - 犬神×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">觉1</div>
+					<div class="table-cell">觉×1 狸猫×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">觉2</div>
+					<div class="table-cell">觉×1 赤舌×1 座敷童子×2；二回合 - 犬神×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">首领：酒吞童子</div>
+					<div class="table-cell">酒吞童子×1 跳跳哥哥×1 食发鬼×2；二回合 - 酒吞童子×1 兵俑×1 骨女×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：武士之灵</div>
+					<div class="table-cell">武士之灵×14</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：丑时之女</div>
+					<div class="table-cell">丑时之女×14</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第十一章 染红了的枫叶林</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">武士之灵1</div>
+					<div class="table-cell">武士之灵×1 寄生魂×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">武士之灵2</div>
+					<div class="table-cell">武士之灵×1 独眼小僧×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">独眼小僧1</div>
+					<div class="table-cell">独眼小僧×1 涂壁×1 天邪鬼赤×2（简单模式）</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">独眼小僧1</div>
+					<div class="table-cell">独眼小僧×1 涂壁×1 天邪鬼赤×2；二回合 - 独眼小僧×1（困难模式）</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">独眼小僧2</div>
+					<div class="table-cell">独眼小僧×1 管狐×1 天邪鬼赤×2（简单模式）</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">独眼小僧2</div>
+					<div class="table-cell">独眼小僧×1 管狐×1 天邪鬼赤×2；二回合 - 独眼小僧×1（困难模式）</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">饿鬼1</div>
+					<div class="table-cell">饿鬼×1 涂壁×1 管狐×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">饿鬼2</div>
+					<div class="table-cell">饿鬼×3 管狐×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">首领：鬼女红叶</div>
+					<div class="table-cell">鬼女红叶×1 童女×1 天邪鬼青×2；二回合 - 鬼女红叶×1 骨女×1 觉×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：寄生魂</div>
+					<div class="table-cell">寄生魂×14</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：饿鬼</div>
+					<div class="table-cell">饿鬼×14</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第十二章 另一个晴明</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">海坊主1</div>
+					<div class="table-cell">海坊主×1 帚神×1 涂壁×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">海坊主2</div>
+					<div class="table-cell">海坊主×1 涂壁×1 鸦天狗×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">童男1</div>
+					<div class="table-cell">童男×1 天邪鬼黄×1 鸦天狗×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">童男2</div>
+					<div class="table-cell">童男×1 童女×1 鸦天狗×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">童女1</div>
+					<div class="table-cell">童女×1 盗墓小鬼×1 提灯小僧×2；二回合 - 雪女×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">童女2</div>
+					<div class="table-cell">童女×3 盗墓小鬼×1；二回合 - 雪女×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">首领：雪女</div>
+					<div class="table-cell">雪女×1 寄生魂×1 武士之灵×2；二回合 - 雪女×1 跳跳妹妹×1 跳跳哥哥×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：童男</div>
+					<div class="table-cell">童男×14</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：童女</div>
+					<div class="table-cell">童女×14</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第十三章 箭与弓道</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">饿鬼1</div>
+					<div class="table-cell">饿鬼×1  天邪鬼赤×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">饿鬼2</div>
+					<div class="table-cell">饿鬼×1  天邪鬼赤×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">饿鬼3</div>
+					<div class="table-cell">饿鬼×1  天邪鬼赤×3；二回合 - 首无×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">唐纸伞妖1</div>
+					<div class="table-cell">唐纸伞妖×1 天邪鬼赤×1 天邪鬼绿×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">唐纸伞妖2</div>
+					<div class="table-cell">唐纸伞妖×1 天邪鬼赤×1 天邪鬼绿×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">唐纸伞妖3</div>
+					<div class="table-cell">唐纸伞妖×1 天邪鬼赤×1 天邪鬼绿×2；二回合 - 首无×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">首领：首无</div>
+					<div class="table-cell">首无×1 骨女×1 灯笼鬼×1 山兔×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：涂壁</div>
+					<div class="table-cell">涂壁×14</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：兵俑</div>
+					<div class="table-cell">兵俑×14</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第十四章 梦境的邂逅</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">帚神1</div>
+					<div class="table-cell">帚神×1 天邪鬼赤×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">帚神2</div>
+					<div class="table-cell">帚神×1 天邪鬼赤×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">帚神3</div>
+					<div class="table-cell">帚神×1 天邪鬼赤×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">涂壁1</div>
+					<div class="table-cell">涂壁×6</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">涂壁2</div>
+					<div class="table-cell">涂壁×6</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">涂壁3</div>
+					<div class="table-cell">涂壁×6；二回合 - 食梦貘×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">首领：食梦貘</div>
+					<div class="table-cell">食梦貘×1 天邪鬼赤×3；二回合 - 食梦貘×4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：盗墓小鬼</div>
+					<div class="table-cell">盗墓小鬼×14</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：狸猫</div>
+					<div class="table-cell">狸猫×14</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第十五章 阴界裂缝</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">天邪鬼绿1</div>
+					<div class="table-cell">天邪鬼绿×1 赤舌×1 天邪鬼赤×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">天邪鬼绿2</div>
+					<div class="table-cell">天邪鬼绿×1 赤舌×1 天邪鬼赤×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">天邪鬼绿3</div>
+					<div class="table-cell">天邪鬼绿×1 赤舌×1 天邪鬼赤×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">提灯小僧1</div>
+					<div class="table-cell">提灯小僧×1 赤舌×1 九命猫×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">提灯小僧2</div>
+					<div class="table-cell">提灯小僧×1 赤舌×1 九命猫×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">提灯小僧3</div>
+					<div class="table-cell">提灯小僧×1 赤舌×1 九命猫×2；二回合 - 大天狗×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">首领：跳跳妹妹</div>
+					<div class="table-cell">跳跳妹妹×1 九命猫×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：跳跳弟弟</div>
+					<div class="table-cell">跳跳弟弟×14</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：跳跳妹妹</div>
+					<div class="table-cell">跳跳妹妹×14</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第十六章 冥界审判</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">饿鬼1</div>
+					<div class="table-cell">饿鬼×1 山兔×1 山童×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">饿鬼2</div>
+					<div class="table-cell">饿鬼×1 山兔×1 山童×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">饿鬼3</div>
+					<div class="table-cell">饿鬼×1 山兔×1 山童×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">赤舌1</div>
+					<div class="table-cell">赤舌×1 寄生魂×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">赤舌2</div>
+					<div class="table-cell">赤舌×1 寄生魂×3；二回合 - 赤舌×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">赤舌3</div>
+					<div class="table-cell">赤舌×1 寄生魂×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">首领：判官</div>
+					<div class="table-cell">判官×1 鬼使黑×1 鬼使白×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：赤舌</div>
+					<div class="table-cell">赤舌×14</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：山童</div>
+					<div class="table-cell">山童×14</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第十七章 阴阳逆反</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">鸦天狗1</div>
+					<div class="table-cell">鸦天狗×1 风小麒麟×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">鸦天狗2</div>
+					<div class="table-cell">鸦天狗×1 风小麒麟×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">鸦天狗3</div>
+					<div class="table-cell">鸦天狗×1 风小麒麟×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">狸猫1</div>
+					<div class="table-cell">狸猫×1 火小麒麟×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">狸猫2</div>
+					<div class="table-cell">狸猫×1 火小麒麟×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">狸猫3</div>
+					<div class="table-cell">狸猫×1 火小麒麟×3；二回合 - 黑凤凰×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">首领：荒川之主</div>
+					<div class="table-cell">荒川之主×1 灯笼鬼×1 骨女×1 山兔×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：萤草</div>
+					<div class="table-cell">萤草×14</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：鸦天狗</div>
+					<div class="table-cell">鸦天狗×14</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第十八章 阴阳之理</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">九命猫1</div>
+					<div class="table-cell">九命猫×6</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">九命猫2</div>
+					<div class="table-cell">九命猫×6</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">九命猫3</div>
+					<div class="table-cell">九命猫×6</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三尾狐1</div>
+					<div class="table-cell">三尾狐×2 九命猫×2；二回合 - 大天狗×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三尾狐2</div>
+					<div class="table-cell">三尾狐×2 九命猫×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三尾狐3</div>
+					<div class="table-cell">三尾狐×2 九命猫×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">首领：大天狗</div>
+					<div class="table-cell">大天狗×1 鸦天狗×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：独眼小僧</div>
+					<div class="table-cell">独眼小僧×14</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：觉</div>
+					<div class="table-cell">觉×14</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">挑战：镰鼬</div>
+					<div class="table-cell">镰鼬×14</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第十九章 八岐大蛇的复活</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">清姬1</div>
+					<div class="table-cell">二口女×1 络新妇×2 清姬×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">清姬2</div>
+					<div class="table-cell">清姬×1 二口女×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">络新妇1</div>
+					<div class="table-cell">络新妇×3 清姬×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">络新妇2</div>
+					<div class="table-cell">络新妇×2 清姬×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二口女1</div>
+					<div class="table-cell">二口女×1 络新妇×3；二回合 - 络新妇×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二口女2</div>
+					<div class="table-cell">二口女×4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二口女3</div>
+					<div class="table-cell">古笼火×1 络新妇×2 二口女×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">首领：八百比丘尼</div>
+					<div class="table-cell">二口女×1 清姬×2 孔雀×2 八百比丘尼×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第二十章 赌上性命的仪式</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">般若1</div>
+					<div class="table-cell">般若×4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">般若2</div>
+					<div class="table-cell">古笼火×3 般若×1；第二回合 - 凤凰火×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">般若3(坐)</div>
+					<div class="table-cell">古笼火×3 清姬×2 般若×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">古笼火1</div>
+					<div class="table-cell">清姬×1 二口女×2 古笼火×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">古笼火2(坐)</div>
+					<div class="table-cell">般若×4 二口女×1 古笼火×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">清姬1(坐)</div>
+					<div class="table-cell">般若×3 清姬×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">清姬2</div>
+					<div class="table-cell">古笼火×5 清姬×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">首领：妖刀姬</div>
+					<div class="table-cell">妖刀姬×1 般若×2 二口女×1 古笼火×2</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第二十一章 七角山秘闻</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">烟烟罗1</div>
+					<div class="table-cell">烟烟罗×1 武士之灵×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">烟烟罗2</div>
+					<div class="table-cell">烟烟罗×1 武士之灵×2 兵俑×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">食发鬼1</div>
+					<div class="table-cell">丑时之女×3 食发鬼×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">食发鬼2</div>
+					<div class="table-cell">丑时之女×2 食发鬼×1 兵俑×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">食发鬼3</div>
+					<div class="table-cell">丑时之女×2 食发鬼×1 兵俑×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">吸血姬1</div>
+					<div class="table-cell">跳跳弟弟×3 吸血姬×1 ;二回合 - 夜叉×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">吸血姬2</div>
+					<div class="table-cell">跳跳弟弟×2 吸血姬×1 武士之灵×1 ;二回合 - 夜叉×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">首领：萤草</div>
+					<div class="table-cell">吸血姬×1 烟烟罗×2 萤草×1 ;二回合 - 夜叉×1 烟烟罗×2 萤草×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第二十二章 八岐大蛇的密谋</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">络新妇1</div>
+					<div class="table-cell">络新妇×1 烟烟罗×2 般若×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">络新妇2</div>
+					<div class="table-cell">烟烟罗×2 络新妇×1 二口女×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">络新妇3</div>
+					<div class="table-cell">二口女×3 络新妇×1 ;二回合 - 夜叉×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二口女1</div>
+					<div class="table-cell">二口女×3 烟烟罗×1 ;二回合 - 络新妇×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二口女(坐)</div>
+					<div class="table-cell">二口女×2 烟烟罗×2 ;二回合 - 青坊主×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">青坊主1</div>
+					<div class="table-cell">二口女×2 青坊主×1 烟烟罗×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">青坊主2</div>
+					<div class="table-cell">青坊主×1 般若×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">首领：络新妇</div>
+					<div class="table-cell">二口女×2 般若×1 酒吞童子×1 ;二回合 - 椒图×1 惠比寿×1 吸血姬×1 络新妇×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第二十三章 沉睡的傀儡师</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">孟婆1</div>
+					<div class="table-cell">山兔×3 孟婆×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">孟婆2</div>
+					<div class="table-cell">山兔×3 孟婆×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">孟婆3</div>
+					<div class="table-cell">山兔×3 孟婆×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">盗墓小鬼1</div>
+					<div class="table-cell">座敷童子×2 河童×1 盗墓小鬼×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">盗墓小鬼2</div>
+					<div class="table-cell">座敷童子×2 河童×1 盗墓小鬼×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">骨女1</div>
+					<div class="table-cell">赤舌×3 骨女×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">骨女2</div>
+					<div class="table-cell">赤舌×3 骨女×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">首领：傀儡师</div>
+					<div class="table-cell">盗墓小鬼×3 傀儡师×1 ;二回合 - 萤草×3 傀儡师×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第二十四章 祭品巫女·前编</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">络新妇1</div>
+					<div class="table-cell">跳跳哥哥×3 络新妇×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">络新妇2</div>
+					<div class="table-cell">跳跳哥哥×3 络新妇×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">清姬1</div>
+					<div class="table-cell">鬼使黑×2 鬼使白×1 清姬×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">清姬2</div>
+					<div class="table-cell">鬼使黑×2 鬼使白×1 清姬×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">清姬3</div>
+					<div class="table-cell">鬼使黑×2 鬼使白×1 清姬×1 ;二回合 - 清姬×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">吸血姬1</div>
+					<div class="table-cell">海坊主×3 吸血姬×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">吸血姬2</div>
+					<div class="table-cell">海坊主×3 吸血姬×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">首领：清姬</div>
+					<div class="table-cell">骨女×1 络新妇×1 鬼使白×1 清姬×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第二十五章 祭品巫女·后编</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">巫蛊师1</div>
+					<div class="table-cell">般若×2 九命猫×1 巫蛊师×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">巫蛊师2</div>
+					<div class="table-cell">武士之灵×2 独眼小僧×1 巫蛊师×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">以津真天1</div>
+					<div class="table-cell">古笼火×2 烟烟罗×1 以津真天×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">以津真天2</div>
+					<div class="table-cell">独眼小僧×2 蝴蝶精×1 以津真天×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">兵俑1</div>
+					<div class="table-cell">山兔×2 椒图×1 兵俑×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">兵俑2</div>
+					<div class="table-cell">山兔×2 椒图×1 兵俑×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">兵俑3</div>
+					<div class="table-cell">鸦天狗×3 兵俑×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">首领：鸩</div>
+					<div class="table-cell">骨女×1 清姬×1 妖刀姬×1 鸩×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第二十六章 决战的终章</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">百目鬼1</div>
+					<div class="table-cell">兔丸×2 萤草×1 百目鬼×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">百目鬼2</div>
+					<div class="table-cell">兔丸×2 萤草×1 百目鬼×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">百目鬼3</div>
+					<div class="table-cell">兔丸×2 萤草×1 百目鬼×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">觉1</div>
+					<div class="table-cell">萤草×1 虫师×1 夜叉×1 觉×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">觉2</div>
+					<div class="table-cell">萤草×1 虫师×1 夜叉×1 觉×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">首无1</div>
+					<div class="table-cell">虫师×2 寄生魂×1 首无×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">首无2</div>
+					<div class="table-cell">虫师×2 寄生魂×1 首无×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">首领：荒</div>
+					<div class="table-cell">万年竹×1 夜叉×1 追月神×1 荒×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第二十七章 深海的孤独</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">金鱼姬1</div>
+					<div class="table-cell">海坊主×3 金鱼姬×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">金鱼姬2</div>
+					<div class="table-cell">海坊主×3 金鱼姬×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">鲤鱼精1</div>
+					<div class="table-cell">河童×3 鲤鱼精×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">河童1</div>
+					<div class="table-cell">鲤鱼精×3 河童×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">河童2</div>
+					<div class="table-cell">鲤鱼精×3 河童×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">海坊主1</div>
+					<div class="table-cell">傀儡师×3 海坊主×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">海坊主2</div>
+					<div class="table-cell">傀儡师×3 海坊主×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">首领：化鲸</div>
+					<div class="table-cell">夜叉×3 化鲸×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第二十八章 少女与面具</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">跳跳妹妹1</div>
+					<div class="table-cell">跳跳犬×3 跳跳妹妹×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">傀儡师1</div>
+					<div class="table-cell">傀儡师×3 觉×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">傀儡师2</div>
+					<div class="table-cell">傀儡师×3 觉×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">判官1</div>
+					<div class="table-cell">黑童子×1 白童子×1 判官×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">荒1</div>
+					<div class="table-cell">跳跳妹妹×3 荒×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">阎魔1</div>
+					<div class="table-cell">鬼使黑×2 黑童子×1 阎魔×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">面灵气1</div>
+					<div class="table-cell">判官×1 食发鬼×1 清姬×1 面灵气×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">首领：面灵气</div>
+					<div class="table-cell">鬼使白×1 鬼使黑×1 面灵气×2</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="table equipment">
+			<div class="table-caption">【御魂 八岐大蛇】</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第一层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">三尾狐×1 天邪鬼黄×1 天邪鬼青×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">山童×1 涂壁×1 独眼小僧×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">八歧大蛇×1 天邪鬼赤×2</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第二层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">妖狐×1 鲤鱼精×1 河童×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">吸血姬×1 萤草×1 兵俑×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">八歧大蛇×1 童女×2</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第三层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">桃花妖×1 蝴蝶精×1 青蛙瓷器×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">海坊主×1 鲤鱼精×1 椒图×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">八歧大蛇×1 座敷童子×2</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第四层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">犬神×1 童男×1 童女×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">大天狗×1 鬼使黑×1 鬼使白×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">八歧大蛇×1 食梦貘×2</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第五层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">镰鼬×1 骨女×1 丑时之女×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">傀儡师×1 跳跳哥哥×1 独眼小僧×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">八歧大蛇×1 孟婆×2</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第六层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">雨女×1 孟婆×1 座敷童子×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">阎魔×1 巫蛊师×1 鸦天狗×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">八歧大蛇×1 骨女×2</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第七层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">丑时之女×1 凤凰火×1 食发鬼×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">山兔×1 酒吞童子×1 妖琴师×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">八歧大蛇×1 荒川之主×2</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第八层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">管狐×1 判官×1 饿鬼×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">蝴蝶精×1 白狼×1 椒图×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">八歧大蛇×1 茨木童子×2</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第九层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">椒图×1 萤草×1 鲤鱼精×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">狸猫×1 清姬×1 食梦貘×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">八歧大蛇×1 两面佛×2</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第十层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">二口女×1 觉×1 萤草×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">椒图×1 青行灯×1 酒吞童子×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">八歧大蛇×1 大天狗×2</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="table">
+			<div class="table-caption">【御魂 业原火】</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">贪之阵/嗔之针</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">萤草×3 妖狐×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">三尾狐×1 蝴蝶精×1 兵佣×1 萤草×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">贪×1 嗔×1 痴×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">痴之阵</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">萤草×3 妖狐×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">三尾狐×1 椒图×1 萤草×1 蝴蝶精×1 兵佣×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">贪×1 嗔×1 痴×1</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="table monster">
+			<div class="table-caption">【妖气封印】</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">跳跳哥哥</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">天邪鬼绿×4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">帚神×2 天邪鬼青×1 天邪鬼赤×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">跳跳哥哥×3 天邪鬼青×2 天邪鬼黄×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">椒图</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">天邪鬼绿×3 天邪鬼黄×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">天邪鬼绿×3 天邪鬼赤×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">椒图×3 天邪鬼绿×2 天邪鬼黄×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">骨女</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">帚神×4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">天邪鬼赤×1 天邪鬼绿×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">骨女×3 天邪鬼绿×3</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">饿鬼</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">涂壁×1  天邪鬼绿×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">唐纸伞妖×1 天邪鬼绿×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">饿鬼×3 提灯小僧×3</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">二口女</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">帚神×1 天邪鬼青×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">帚神×3 提灯小僧×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">二口女×1 提灯小僧×3</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">海坊主</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">提灯小僧×1 天邪鬼黄×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">天邪鬼青×1 天邪鬼绿×1 天邪鬼赤×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">海坊主×3 提灯小僧×3</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">鬼使黑</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">天邪鬼赤×1 涂壁×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">帚神×3 涂壁×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">鬼使黑×3 提灯小僧×3</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">小松丸</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">天邪鬼赤×1 涂壁×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">帚神×3 涂壁×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">小松丸×3 提灯小僧×3</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">日和坊</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">首无×2 鸠×1 日和坊×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">雪女×1 座敷童子×1 镰鼬×1 日和坊×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">黑童子×1 白童子×1 酒吞童子×1 茨木童子×1 青行灯×1 日和坊×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">金币妖怪</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">铁鼠×6</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">铁鼠×6</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">铁鼠×6</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">经验妖怪</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">奉为达摩×4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">奉为达摩×6</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">奉为达摩×6</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="table">
+			<div class="table-caption">【红叶的羁绊】</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第一层 邂逅</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">管狐×4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">饿鬼×4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">鬼女红叶×1 觉×3</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第二层 别离</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">管狐×4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">饿鬼×4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">鬼女红叶×1  跳跳妹妹×1 跳跳弟弟×1  跳跳哥哥×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第三层 暮想</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">管狐×4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">饿鬼×4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">鬼女红叶×1 首无×2 三尾狐×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第四层 唆摆</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">管狐×3 天邪鬼黄×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">饿鬼×3 兵俑×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">鬼女红叶×1 鸦天狗×2 丑时之女×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第五层 意乱</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">管狐×3 天邪鬼黄×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">饿鬼×3 兵俑×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">鬼女红叶×1 铁鼠×2 骨女×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第六层 妖变</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">管狐×3 赤舌×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">饿鬼×3 椒图×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">鬼女红叶×1 雨女×2 雪女×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第七层 堕落</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">管狐×3 赤舌×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">饿鬼×3 椒图×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">鬼女红叶×1 吸血姬×2 狸猫×1 酒吞童子×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第八层 痴迷</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">管狐×3 独眼小僧×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">饿鬼×3 犬神×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">鬼女红叶×1 兵俑×1 椒图×1 桃花妖×1 酒吞童子×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第九层 苦恋</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">管狐×3 独眼小僧×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">饿鬼×3 犬神×1 椒图×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">鬼女红叶×1  酒吞童子×1 桃花妖×1 鸦天狗×1 椒图×1 丑时之女×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第十层 羁绊</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">管狐×3 独眼小僧×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">饿鬼×3 犬神×1 椒图×1 兵俑×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">鬼女红叶×1 酒吞童子×1 桃花妖×1 般若×1 椒图×1 吸血姬×1</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="table">
+			<div class="table-caption">【妖刀的秘籍】</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">妖刀·一式</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">天邪鬼青×4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">狸猫×4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">妖刀姬×1 盗墓小鬼×3</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">妖刀·二式</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">天邪鬼青×4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">狸猫×4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">妖刀姬×1 蝴蝶精×3</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">妖刀·三式</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">天邪鬼青×4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">狸猫×4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">妖刀姬×1 雨女×3</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">妖刀·四式</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">天邪鬼青×3 涂壁×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">狸猫×3 蝴蝶精×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">妖刀姬×1 三尾狐×3</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">妖刀·五式</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">天邪鬼青×3 涂壁×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">狸猫×3 蝴蝶精×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">妖刀姬×1 傀儡师×1 二口女×1 骨女×1 </div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">妖刀·六式</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">天邪鬼青×3 天邪鬼绿×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">狸猫×3 鸦天狗×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">妖刀姬×1 桃花妖×1 樱花妖×1 清姬×1 </div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">妖刀·七式</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">天邪鬼青×3 天邪鬼绿×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">狸猫×3 鸦天狗×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">妖刀姬×1 鬼使黑×1 鬼使白×1 判官×1 </div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">妖刀·八式</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">天邪鬼青×3 九命猫×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">狸猫×3 鲤鱼精×1 河童×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">妖刀姬×1 大天狗×1 青行灯×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">妖刀·九式</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">天邪鬼青×3 九命猫×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">狸猫×3 鲤鱼精×1 河童×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">妖刀姬×1 大天狗×1 青行灯×1 童男×2 </div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">妖刀·十式</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">天邪鬼青×2 九命猫×2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">狸猫×3 河童×1 椒图×1 鲤鱼精×1 </div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">妖刀姬×1 妖狐×2 桃花妖×1 大天狗×1 青行灯×1</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="table">
+			<div class="table-caption">【河畔童谣】</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第一层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">盗墓小鬼×1 提灯小僧×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">童女×1 童男×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">河童×1 奉为达摩×1 招福达摩×1 大吉达摩×1 御行达摩×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第二层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">盗墓小鬼×1 提灯小僧×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">独眼小僧×1 山童×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">河童×1 白童子×1 黑童子×1 座敷童子×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第三层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">惠比寿×1 武士之灵×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">烟烟罗×1 食发鬼×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">河童×1 灯笼鬼×2 赤舌×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第四层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">廉鼬×1 黑豹×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">萤草×1 觉×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">河童×1 丑时之女×2 兵俑×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第五层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">天邪鬼黄×1 蝴蝶精×2 鬼女红叶×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">孟婆×1 妖琴师×2 山兔×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">河童×1 樱花妖×1 桃花妖×1 凤凰火×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第六层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">鬼使白×1 鬼使黑×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">座敷童子×1 古笼火×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">河童×1 天邪鬼青×1 天邪鬼赤×1 天邪鬼绿×1 天邪鬼黄×1 </div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第七层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">青灯行×1 管狐×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">茨木童子×1 首无×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">河童×1 雨女×1 判官×1 食梦貘×1 </div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第八层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">海坊主×1 青坊主×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">荒川之主×1 吸血姬×2 椒图×1 鲤鱼精×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">河童×1 海坊主×2 椒图×1 鲤鱼精×1 荒川之主×1 </div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第九层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">雨女×1 青蛙瓷器×3(觉醒)</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">妖狐×1(先发制人) 妖刀姬×1 鲤鱼精×1 跳跳妹妹×1 萤草×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">河童×1 鸦天狗×2 阎摩×1 鲤鱼精×1 大天狗×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第十层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">兵俑×1 萤草×3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">跳跳弟弟×1 小鹿男×2 桃花妖×2 椒图×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">河童×1 樱花妖×1 鲤鱼精×1 椒图×1 妖狐×1(先发制人) 花鸟卷×1</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="table">
+			<div class="table-caption">【雨女的等候】</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第一层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">盗墓小鬼×3 唐纸伞妖×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">九命猫×3 铁鼠×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">座敷童子×3 雨女×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第二层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">盗墓小鬼×3 唐纸伞妖×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">九命猫×3 铁鼠×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">首无×3 雨女×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第三层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">盗墓小鬼×3 唐纸伞妖×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">九命猫×3 铁鼠×1 </div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">武士之灵×3 雨女×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第四层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">唐纸伞妖×3 赤舌×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">觉×3 丑时之女×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">骨女×4 雨女×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第五层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">唐纸伞妖×3 赤舌×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">觉×3 丑时之女×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">烟烟罗×4 雨女×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第六层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">唐纸伞妖×3 赤舌×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">觉×3 丑时之女×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">夜叉×4 雨女×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第七层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">鸦天狗×3 巫蛊师×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">萤草×2 三尾狐×1 蝴蝶精×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">兵俑×4 雨女×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第八层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">鸦天狗×3 巫蛊师×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">跳跳弟弟×4 椒图×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">河童×5 雨女×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第九层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">鸦天狗×3 巫蛊师×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">清姬×2 鬼使白×2 判官×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">管狐×5 雨女×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第十层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">鸦天狗×3 巫蛊师×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">吸血姬×5 童男×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">青蛙瓷器×5 雨女×1</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="table">
+			<div class="table-caption">【荒川之怒】</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第一层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">灯笼鬼×3 赤舌×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">寄生魂×3 武士之灵×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">盗墓小鬼×3 荒川之主×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第二层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">灯笼鬼×3 赤舌×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">寄生魂×3 武士之灵×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">童女×3 荒川之主×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第三层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">灯笼鬼×3 赤舌×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">寄生魂×3 武士之灵×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">管狐×3 荒川之主×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第四层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">河童×3 鲤鱼精×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">蝴蝶精×3 海坊主×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">鸦天狗×4 荒川之主×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第五层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">河童×3 鲤鱼精×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">蝴蝶精×3 海坊主×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">山兔×4 荒川之主×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第六层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">河童×3 鲤鱼精×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">蝴蝶精×3 海坊主×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">雪女×4 荒川之主×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第七层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">古笼火×3 金鱼姬×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">夜叉×4 椒图×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">青姬×4 荒川之主×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第八层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">古笼火×3 金鱼姬×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">夜叉×4 惠比寿×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">海坊主×5 荒川之主×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第九层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">古笼火×4 金鱼姬×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">夜叉×2 烟烟罗×2 荒川之主×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">章鱼×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第十层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">古笼火×5 金鱼姬×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">夜叉×4 大天狗×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">桃花妖×1 雪女×1 青行灯×1 姑获鸟×1 惠比寿×1 荒川之主×1</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="table">
+			<div class="table-caption">【风暴之巅】</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第一层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">帚神×4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">三尾狐×4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">首无×3 大天狗×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第二层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">帚神×3 天邪鬼黄×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">三尾狐×4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">狸猫×3 大天狗×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第三层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">帚神×3 青蛙瓷器×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">三尾狐×4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">山童×3 大天狗×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第四层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">帚神×3 椒图×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">三尾狐×4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">御行达摩×4 、独眼小僧×1 大天狗×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第五层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">帚神×3 椒图×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">三尾狐×3 赤舌×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">鸦天狗×4 雪女×1 大天狗×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第六层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">帚神×3 金鱼姬×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">三尾狐×3 赤舌×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">清姬×2 鬼使白×1 跳跳弟弟×1 大天狗×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第七层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">帚神×3 金鱼姬×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">夜叉×5 镰鼬×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">萤草×4 雨女×1 大天狗×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第八层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">帚神(铮)×3 童男×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">妖狐×5 大天狗(薙魂)×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">桃花妖(木魅/反枕)×5 大天狗(薙魂)×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第九层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">帚神(铮)×3 童男×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">三尾狐(蝠翼)×1 酒吞童子(铮)×1 大天狗(破势)×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">雪女(薙魂)×1 大天狗(薙魂)×1 黑晴明(木魅、血量94362)×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第十层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">帚神(铮)×3 武士之灵×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">吸血姬(铮/镇墓兽)×5 椒图×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">雪女(薙魂)×1 大天狗(薙魂)×1 黑晴明(木魅、血量136689)×1</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="table">
+			<div class="table-caption">【伞剑的守护】</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第一层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">帚神×3 涂壁×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">觉×3 蝴蝶精×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">红达摩×1 白达摩×1 黑达摩×1 姑获鸟×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第二层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">帚神×3 涂壁×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">觉×3 蝴蝶精×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">唐纸伞妖×3 姑获鸟×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第三层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">帚神×3 涂壁×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">觉×3 蝴蝶精×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">鸦天狗×2 童男×1 童女×1 姑获鸟×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第四层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">盗墓小鬼×3 天邪鬼青×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">跳跳弟弟×2 跳跳妹妹×1 跳跳哥哥×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">鸩×1 以津真天×1 大天狗×1 凤凰火×1 姑获鸟×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第五层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">盗墓小鬼×3 天邪鬼青×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">跳跳弟弟×2 跳跳妹妹×1 跳跳哥哥×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">天邪鬼黄×1 灯笼鬼×1 萤草×1 白狼×1 姑获鸟×2</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第六层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">盗墓小鬼×3 天邪鬼青×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">跳跳弟弟×2 跳跳妹妹×1 跳跳哥哥×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">鸩×1 鬼使白×1 跳跳弟弟×1 清姬×1 樱花妖×1 姑获鸟×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第七层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">白狼×2 孟婆×1 萤草×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">判官×3 凤凰火×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">姑获鸟×5 灯笼鬼×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第八层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">白狼×2 孟婆×2 萤草×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">络新妇×2 判官×2 凤凰火×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">灯笼鬼×1 桃花妖×2 酒吞童子×2 姑获鸟×2</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第九层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">白狼×2 孟婆×3 萤草×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">络新妇×3 判官×2 凤凰火×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">灯笼鬼×1 九命猫×2 桃花妖×1 镰鼬×1 姑获鸟×2</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第十层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">白狼×2 孟婆×3 萤草×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">络新妇×3 判官×2 凤凰火×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">黑童子×1 一目连×1 吸血姬×2 姑获鸟×2</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="table">
+			<div class="table-caption">【夏之风物诗】</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第一层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">提灯小僧×3 蝴蝶精×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">清姬×3 判官×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">赤舌×3 镰鼬×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第二层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">天邪鬼赤×3 食发鬼×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">古笼火×3 鬼使黑×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">管狐×3 镰鼬×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第三层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">盗墓小鬼×3 觉×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">巫蛊师×3 孟婆×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">烟烟罗×3 镰鼬×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第四层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">天邪鬼青×3 山童×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">帚神×3 青蛙瓷器×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">九命猫×2 骨女×2 镰鼬×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第五层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">盗墓小鬼×3 天邪鬼青×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">灯笼鬼×2 鲤鱼精×2 白狼×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">青行灯×4 镰鼬×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第六层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">九尾狐×3 赤舌×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">小松丸×2 夜叉×2 跳跳妹妹×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">鸩×5 镰鼬×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第七层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">跳跳弟弟×2 络新妇×2 妖琴师×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">鬼女红叶×2 以津真天×2 跳跳哥哥×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">河童×4 镰鼬×2</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第八层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">狸猫×2 判官×2 金鱼姬×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">萤草×5 椒图×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">丑时之女×5 镰鼬×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第九层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">鲤鱼精×2 妖狐×2 以津真天×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">鸦天狗×2 姑获鸟×2 万年竹×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">白蛋×1 独眼小僧×1 樱花妖×1 犬神×1 万年竹×1 彼岸花×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第十层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">跳跳弟弟×2 海坊主×3 花鸟卷×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">童女×2 童男×2 黑童子×1 阎魔×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">小鹿男×3 镰鼬×3</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="table">
+			<div class="table-caption">【意志的觉醒】</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第一层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">天邪鬼黄×3 帚神×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">唐纸伞妖×3 提灯小僧×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">盗墓小鬼×2 兵俑×1 小鹿男×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第二层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">天邪鬼青×3 寄生魂×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">灯笼鬼×3 古笼火×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">河童×2 鲤鱼精×1 小鹿男×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第三层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">天邪鬼绿×3 觉×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">天邪鬼赤×3 跳跳妹妹×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">独眼小僧×1 蝴蝶精×1 萤草×1 小鹿男×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第四层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">赤舌×3 食发鬼×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">帚神×3 兔丸×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">跳跳弟弟×2 萤草×1 小鹿男×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第五层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">提灯小僧×3 食发鬼×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">山童×3 兔丸×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">跳跳弟弟×1 跳跳妹妹×1 独眼小僧×1 白童子×1 萤草×1 小鹿男×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第六层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">食发鬼×4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">兔丸×4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">天邪鬼赤(地藏)×1 萤草(招财)×1 匣中少女(地藏)×1 雪女(镜姬)×1 大天狗(镇墓兽)×1 小鹿男(招财)×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第七层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">食发鬼×3 食梦貘×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">兔丸(招财)×3 傀儡师(狰)×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">萤草(招财+薙魂)×1 白狼(招财+破势)×1 书翁(招财+镜姬)×1 黑童子(薙魂+镇墓兽)×1 妖刀姬(地藏+镇墓兽)×1 小鹿男(招财+轮入道)×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第八层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">食发鬼×3 烟烟罗×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">兵俑×1 兔丸×2 海坊主×2 万年竹×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">萤草(招财)×1 兵俑(招财+返魂香)×1 鲤鱼精(招财+镜姬)×1 跳跳弟弟(招财+地藏)×1 彼岸花(破势)×1 小鹿男(招财+轮入道)×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第九层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">孟婆×2 食发鬼×2 姑获鸟×1 烟烟罗×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">兔丸×1 山兔×1 黑童子×1 白童子×1 判官×1 阎魔×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">萤草(招财+薙魂)×1 跳跳哥哥(地藏+被服)×1 金鱼姬(镜姬)×1 小松丸(返魂香)×1 荒(招财+镇墓兽)×1 小鹿男(招财+轮入道)×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第十层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">白童子×2 食发鬼×2 姑获鸟×2 烟烟罗×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">兔丸×1 独眼小僧×1 山兔×1 蝴蝶精×1 妖琴师×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合(幻境)</div>
+					<div class="table-cell">小鹿男(镇墓兽)×5</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合(解除幻境)</div>
+					<div class="table-cell">萤草(招财+薙魂)×1 椒图(地藏)×1 桃花妖(镜姬)×1 黑童子(镇墓兽+狰)×1 吸血姬(镇墓兽+狰)×1</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="table">
+			<div class="table-caption">【海怪的温柔】</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第一层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">灯笼鬼×3 提灯小僧×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">帚神×3 壁涂×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">天邪鬼黄×2 天邪鬼赤×1 海坊主×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第二层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">跳跳犬×3 唐纸伞妖×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">寄生魂×3 饿鬼×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">座敷童子×2 椒图×1 海坊主×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第三层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">盗墓小鬼×3 河童×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">赤舌×2 河童×1 鲤鱼精×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">河童×3 海坊主×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第四层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">唐纸伞妖×4 武士之灵×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">提灯小僧×2 狸猫×1 河童×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">鲤鱼精×4 海坊主×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第五层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">天邪鬼青×1 天邪鬼黄×1 天邪鬼绿×1 雨女×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">天邪鬼赤×2 雨女×2 鸦天狗×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">河童×5 海坊主×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第六层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">丑时之女×1 铁鼠×1 首无×1 九命猫×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">山童×2 九尾狐×2 管狐×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">鲤鱼精(被服)×2 河童(破势)×3 海坊主×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第七层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">跳跳妹妹×2 跳跳弟弟×2 兵俑(返魂香)×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">雨女(木魅)×2 河童(破势)×2 夜叉(木魅+日女)×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">夜叉(木魅+日女)×3 鲤鱼精(破势)×1 金鱼姬(蚌精)×1 海坊主(招财猫+针女)×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第八层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">首无×1 河童×1 童女×1 童男×1 夜叉(招财猫+破势)×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">萤草(树精+珍珠)×2 武士之灵(网切)×1 金鱼姬(木魅+三味)×1 蝴蝶精(木魅)×1 鲤鱼精(蚌精+招财猫)×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">镜像阵容 海坊主(被服+针女)×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第九层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">鸦天狗(蝠翼+破势)×3 兔丸(木魅)×2 河童(蝠翼+破势)×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">判官(网切+日女)×1 鸩(网切+日女)×2 清姬(招财猫+网切)×2 鲤鱼精(招财猫+返魂香)×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">黑童子(镇墓兽+狰)×3 樱花妖(镇墓兽+珍珠)×1 百目鬼(蚌精+招财猫)×1 海坊主(镇墓兽+针女+招财猫)×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第十层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">管狐(招财猫+蝠翼)×2 雨女(招财猫+三味)×2 金鱼姬(招财猫)×1 河童(招财猫+破势)×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">凤凰火​(招财猫+魍魉)×1 青坊主(招财猫+网切)×1 般若(招财猫+狰)×1 妖琴师(招财猫+日女)×1 镰鼬(招财猫+轮入道)×1 夜叉(招财猫+网切)×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">黑童子(镇墓兽+狰)×3 樱花妖(镇墓兽+珍珠+薙魂)×1 匣中少女(镇墓兽+地藏+薙魂)×1 海坊主(镇墓兽+针女)×1</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="table">
+			<div class="table-caption">【青灯百物语】</div>
+				
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第一层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">跳跳犬×4 赤舌×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">壁涂×3 寄生魂×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">灯笼鬼×3 青行灯×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第二层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">唐纸伞妖×3 提灯小僧×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">帚神×3 鸦天狗×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">狸猫×2 巫蛊师×1 青行灯×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第三层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">赤舌×3 三尾狐×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">童男×3 童女×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">古笼火×2 数珠×1 青行灯×1</div>
+				</div>
+			</div>
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第四层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">天邪鬼黄×3 食发鬼×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">天邪鬼青×2 丑时之女×1 兵俑×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">觉×4 青行灯×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第五层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">提灯小僧×3 跳跳弟弟×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">天邪鬼绿×2 饿鬼×2 独眼小僧×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">青蛙瓷器×2 蝴蝶妖×2 青行灯×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第六层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">跳跳哥哥×3 首无×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">古笼火×2 管狐×2 山童×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">兔丸×3 鲤鱼精(被服)×2 青行灯×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第七层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">觉×2 山兔×2 萤草(木魅)×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">首无(木魅)×2 山童(雪幽魂)×2 椒图(招财)×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">青坊主(日女+网切)×2 妖琴师×2 姑获鸟×1 青行灯×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第八层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">古笼火×2 鬼使黑×1 鬼使白×1 书翁(薙魂+招财)×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">食梦貘(薙魂+返魂香)×1 白狼(破势)×1 桃花妖(木魅)×1 二口女(网切)×1 镰鼬(三味)×1 万年竹(招财+网切)×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">姑获鸟(针女)×1 日和坊(木魅+被服)×1 鸩(狰+网切)×1 白童子(薙魂+返魂香)×1 两面佛(被服+针女)×1 青行灯(破势+针女)×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第九层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">山童(网切)×2 惠比寿×1 孟婆(破势+木魅)×1 万年竹×1 小松丸×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">金鱼姬(招财)×1 凤凰火(招财)×1 雨女(木魅)×1 烟烟罗(网切)×1 青坊主×1 妖狐×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">日和坊(珍珠)×1 百目鬼(薙魂)×1 般若(魅妖+返魂香)×1 椒图(被服)×1 大天狗(网切+针女)×1 青行灯(镇墓兽+破势)×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第十层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">食发鬼(招财+日女)×1 蝴蝶精(招财)×1 吸血姬(招财+镇墓兽)×1 孟婆(招财+破势)×1 骨女(三味)×1 犬神×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">清姬(招财)×1 以津真天(招财+针女)×1 妖琴师(招财+日女)×1 丑时之女(招财+破势)×1 青坊主(招财+日女)×1 金鱼姬(招财+返魂香)×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">日和坊(珍珠+返魂香)×1 椒图(木魅+被服)×1 般若(薙魂+狰)×1 大天狗(针女+网切)×1 荒(针女+网切)×1 青行灯(被动触发率超高)×1</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="table">
+			<div class="table-caption">【鲜血之月】</div>
+				
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第一层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">盗墓小鬼×3 赤舌×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">壁涂×3 武士之灵×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">寄生魂×3 吸血姬×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第二层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">灯笼鬼×3 古笼火×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">帚神×3 巫蛊师×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">提灯小鬼×3 吸血姬×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第三层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">天邪鬼绿×3 河童×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">天邪鬼黄×3 狸猫×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">天邪鬼青×2 天邪鬼赤×1 吸血姬×1</div>
+				</div>
+			</div>
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第四层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">赤舌×3 食法鬼×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">觉×2 丑时之女×1 管狐×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">九命猫×4 吸血姬×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第五层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">跳跳犬×3 犬神×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">鸩×2 清姬×2 以津真天×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">傀儡师×2 三尾狐×2 吸血姬×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第六层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">管狐×3 妖狐×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">小松丸×2 二口女×2 弈×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">跳跳妹妹×2 跳跳弟弟×2 跳跳哥哥×1 吸血姬(狰+蝠翼)×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第七层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">海坊主×2 夜叉×2 金鱼姬(木魅)×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">武士之灵×2 骨女×2 兵俑(返魂香)×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">椒图(地藏)×1 饿鬼(狰)×2 鸦天狗(狰)×2 吸血姬(狰+蝠翼)×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第八层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">孟婆×2 烟烟罗(雪幽魂)×2 雪童子×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">般若(狰+招财)×1 鬼女红叶(轮入道+招财)×2 络新妇(招财)×2 青行灯(招财+狰)×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">黑童子(镇墓兽+薙魂)×2 小鹿男(木魅+招财)×2 匣中少女(地藏)×1 吸血姬(破势+狰)×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第九层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">奕×5(分别为雪幽魂 日女 魍魉 媚妖 钟灵) 妖琴师(蚌精+招财)×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">鬼使白×2(一只针女+招财 一只魍魉+招财) 清姬×2(一只地藏+招财 一只木魅+招财) 金鱼姬(狰+招财)×1 数珠(招财+日女)×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">花鸟卷(狰)×1 跳跳弟弟(木魅+招财)×1 椒图(地藏+招财)×1 荒川(破势+招财)×1 万年竹(狰+招财)×1 吸血姬(破势+狰)×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第十层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">青蛙瓷器×5(分别为雪幽魂 日女 魍魉 媚妖 钟灵) 童男×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">鬼使白(魍魉)×1 鬼使黑(招财)×1 黑童子(针女)×1 白童子(地藏)×1 判官(薙魂)×1 阎魔(蚌精)×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">鸩(镇墓兽+招财)×1 日和坊(木魅)×1 山风(轮入道)×1 樱花妖(蚌精+地藏+招财)×1 雪童子(雪幽魂+招财)×1 吸血姬(狰)×1</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="table">
+			<div class="table-caption">【狐生百媚】</div>
+				
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第一层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">灯笼鬼×3 提灯小僧×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">天邪鬼赤×3 天邪鬼绿×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">壁涂×3 妖狐×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第二层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">盗墓小鬼×3 赤舌×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">寄生魂×3 武士之灵×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">蝴蝶精×1 食法鬼×1 独眼小僧×1 妖狐×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第三层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">唐纸伞妖×3 鸦天狗×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">跳跳弟弟×3 跳跳妹妹×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">小袖之手×1 兔丸×2 妖狐×1</div>
+				</div>
+			</div>
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第四层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">帚神×3 雨女×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">天邪鬼黄×2 首无×1 青蛙瓷器×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">山童×4 妖狐×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第五层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">天邪鬼青×3 跳跳妹妹×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">狸猫×2 天邪鬼赤×1 天邪鬼黄×1 鲤鱼精×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">九命猫×2 三尾狐×2 妖狐×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第六层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">狸猫×3 兵俑×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">莹草×2 丑时之女×2 山兔×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">管狐×3 饿鬼×2 妖狐×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第七层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">椒图×1 铁鼠×1 山童×2 座敷童子×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">童女×2 河童×2 童男×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">妖琴师(媚妖)×1 座敷童子×1 姑获鸟×1 雪女(雪幽魂)×1 桃花妖(地藏)×1 妖狐(蝠翼)×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第八层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">黑童子(镇墓兽)×4 白童子(木魅)×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">般若×1 樱花妖(地藏)×1 络新妇×1 二口女×2(日女)×1 犬神(招财+蝠翼)×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">傀儡师(网切、破势)×2 女鬼红叶(镇墓兽)×2 骨女(针女)×1 妖狐(蝠翼)×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第九层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">山兔(狰)×5 御馔津(蚌精+木魅)×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">小松丸×2(媚妖、魍魉) 兔丸×2(木魅、地藏) 以津真天(狰)×1 书翁×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">百目鬼(狰)×1 跳跳弟弟(木魅)×1 丑时之女(地藏)×1 妖刀姬(破势)×1 食梦馍(狰)×1 妖狐(蝠翼)×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第十层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">跳跳哥哥(1狰2木魅2返魂香)×5 跳跳妹妹(镇墓兽)×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">姑获鸟(网切+针女)×1 烟烟罗(魍魉)×1 小袖之手×1 青蛙瓷器(日女)×1 妖琴师(轮入道)×1 孟婆(木魅+日女)×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">海坊主(针女+网切)×1 御馔津(返魂香)×1 兵俑(地藏)×1 般若(魍魉)×1 黑童子(镇墓兽+薙魂)×1 妖狐(蝠翼)×1</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="table">
+			<div class="table-caption">【黄泉彼岸】</div>
+				
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第一层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">提灯小僧×3 天邪鬼黄×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">涂壁×3 狸猫×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">帚神×3 彼岸花×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第二层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">提灯小僧×3 天邪鬼黄×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">天邪鬼绿×3 巫蛊师×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">丑时之女×3 彼岸花×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第三层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">提灯小僧×3 天邪鬼黄×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">天邪鬼青×3 丑时之女×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">跳跳弟弟×1 跳跳妹妹×1 跳跳哥哥×1 彼岸花×1</div>
+				</div>
+			</div>
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第四层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">寄生魂×3 天邪鬼赤×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">觉×3 管狐×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">九命猫×4 彼岸花×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第五层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">寄生魂×3 天邪鬼赤×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">鸩×4 以津真天×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">三尾狐×4 彼岸花×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第六层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">寄生魂×3 天邪鬼赤×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">二口女×4 奕×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">黑童子×5 彼岸花×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第七层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">海坊主×4 金鱼姬×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">武士之灵×2 骨女×2 兵俑×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">饿鬼×2 鸦天狗×2 姑获鸟×1 彼岸花×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第八层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">烟烟罗×4 雪童子×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">鬼女红叶×4 般若×1 青行灯×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">络新妇×1 鸩×1 两面佛×1 清姬×1 鬼使白×1 彼岸花×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第九层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">奕×4 妖琴师×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">鲤鱼精×1 海坊主×1 金鱼姬×1 夜叉×1 河童×1 荒川之主×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">青行灯×1 阎魔×1 面灵气×1 御馔津×1 花鸟卷×1 彼岸花×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第十层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">猫掌柜×4 虫师×1 犬神×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">鬼女红叶×1 清姬×1 络新妇×1 骨女×1 三尾狐×1 般若×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">匣中少女×1 荒川之主×1 酒吞童子×1 雪童子×1 桃花妖×1 彼岸花×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">番外</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">提灯小僧×5 青行灯×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">鸩×5 姑获鸟×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">桃花妖×1 樱花妖×1 黑童子×1 白童子×1 雪童子×1 彼岸花×1</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="table">
+			<div class="table-caption">【道成夙愿】</div>
+				
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第一层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">跳跳犬×4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">跳跳犬×4 灯笼鬼×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">跳跳犬×5 清姬×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第二层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">盗墓小鬼×3 唐纸伞妖×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">提灯小僧×3 赤舌×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">樱花妖×4 独眼小僧×1 清姬×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第三层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">帚神×3 三尾狐×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">赤舌×3 武士之灵×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">灯笼鬼×1 赤舌×1 黑童子×1 座敷童子×1 三尾狐×1 清姬×1</div>
+				</div>
+			</div>
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第四层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">三尾狐×3 武士之灵×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">饿鬼×3 巫蛊师×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">山童×3 鸦天狗×2 清姬×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第五层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">跳跳弟弟×3 跳跳妹妹×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">狸猫×4 兵俑×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">九命猫×4 觉×1 清姬×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第六层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">武士之灵×3 巫蛊师×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">骨女×4 傀儡师×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">二口女×5 清姬×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第七层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">首无×5 烟烟罗×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">判官×3 络新妇×2 人面树×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">二口女×2 鬼使白×2 凤凰火×1 清姬×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第八层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">小袖之手×4 烟烟罗×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">二口女×2 络新妇×2 樱花妖×1 妖狐×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">判官×1 鬼女红叶×2 鸩×1 傀儡师×1 清姬×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第九层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">赤舌×2 觉×3 薰×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">鬼使白×2 骨女×2 以津真天×1 人面树×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">鸩×1 鬼女红叶×2 两面佛×1 樱花妖×1 清姬×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第十层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">数珠×4 青坊主×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">孟婆×1 小袖之手×1 人面树×1 鬼女红叶×1 骨女×1 凤凰火×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">百目鬼×1 鬼女红叶×1 椒图×1 鸩×1 山风×1 清姬×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">番外</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">三尾狐×3 九命猫×2 鬼女红叶×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">般若×1 饿鬼×1 兵俑×1 姑获鸟×1 犬神×1 面灵气×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">童男×1 鸩×1 两面佛×1 於菊虫×1 判官×1 清姬×1</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="table">
+			<div class="table-caption">【雪之回忆】</div>
+				
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第一层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">跳跳犬×3 寄生魂×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">帚神×3 童女×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">涂壁×3 雪童子×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第二层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">灯笼鬼×3 提灯小僧×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">唐纸伞妖×3 独眼小僧×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">山童×3 雪童子×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第三层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">盗墓小鬼×3 古笼火×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">天邪鬼赤×3 首无×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">天邪鬼绿×1 天邪鬼黄×1 天邪鬼青×1 雪童子×1</div>
+				</div>
+			</div>
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第四层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">寄生魂×3 武士之灵×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">童女×2 童男×1 食发鬼×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">饿鬼×4 雪童子×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第五层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">跳跳妹妹×3 跳跳哥哥×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">萤草×2 蝴蝶精×2 椒图×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">管狐×2 鸦天狗×2 雪童子×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第六层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">九命猫×3 犬神×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">骨女×2 吸血姬×2 清姬×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">桃花妖×2 三尾狐×2 般若×1 雪童子×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第七层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">傀儡师×2 烟烟罗×2 彼岸花×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">座敷童子×1 山兔×1 姑获鸟×2 食发鬼×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">鸩×3 日和坊×2 雪童子×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第八层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">觉×2 首无×2 惠比寿×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">蝴蝶精×2 管狐×3 樱花妖×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">匣中少女×1 黑童子×1 金鱼姬×1 跳跳弟弟×1 桃花妖×1 雪童子×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第九层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">白狼×5 辉夜姬×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">鬼使白×3 鬼女红叶×2 清姬×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">跳跳哥哥×1 桃花妖×1 妖刀姬×1 鬼使黑×1 雪女×1 雪童子×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第十层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">雪女×5 般若×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">兵俑×2 姑获鸟×3 童女×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">樱花妖×1 山风×1 犬神×1 小松丸×1 镰鼬×1 雪童子×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">番外</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">桃花妖×2 吸血姬×3 雨女×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">御馔津×1 食梦貘×1 花鸟卷×1 辉夜姬×1 镰鼬×1 小鹿男×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">椒图×1 玉藻前×1 一目连×1 雪女×1 荒川之主×1 雪童子×1</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="table">
+			<div class="table-caption">【征服世界】</div>
+				
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第一层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">盗墓小鬼×3 鸩×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">御馔津×4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">烟烟罗×3 荒×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第二层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">白童子×3 鬼使白×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">黑童子×3 鬼使黑×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">判官×3 阎魔×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第三层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">清姬×4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">雪女×4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">雪女×3 雪童子×1</div>
+				</div>
+			</div>
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第四层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">古笼火×4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">虫师×4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">古笼火×2 虫师×1 一目连×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第五层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">天邪鬼青×2 狸猫×1 椒图×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">鬼女红叶×2 觉×2 阎魔×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">跳跳哥哥×2 判官×2 彼岸花×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第六层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">山童×4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">山兔×4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">万年竹×2 薰×1 山风×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第七层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">饿鬼×2 蝴蝶精×2 食发鬼×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">独眼小僧×2 座敷童子×2 雪女×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">鸦天狗×2 般若×2 雪女×1 大天狗×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第八层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">灯笼鬼×2 觉×2 鬼女红叶×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">童男×2 日和坊×1 茨木童子×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">鬼女红叶×1 茨木童子×1 酒吞童子×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第九层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">盗墓小鬼×2 赤舌×2 铁鼠×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">妖琴师×2 雨女×2 络新妇×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">九命猫×2 三尾狐×2 清姬×1 玉藻前×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第十层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">古笼火×5 椒图×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">夜叉×5 数珠×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">海坊主×1 河童×1 椒图×1 化鲸×1 鲤鱼精×1 荒川之主×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">番外</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">赤舌×2 妖琴师×3 鬼女红叶×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">二回合</div>
+					<div class="table-cell">海坊主×4 青坊主×1 两面佛×1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">三回合</div>
+					<div class="table-cell">山童×1 以津真天×1 姑获鸟×1 金鱼姬×1</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="table">
+			<div class="table-caption">【呱士无双】</div>
+				
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第一层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">山兔×3 寄生魂×2 青蛙瓷器×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第二层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">铁鼠×3 河童×2 青蛙瓷器×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第三层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">鸦天狗×2 饿鬼×2 犬神×1 青蛙瓷器×1</div>
+				</div>
+			</div>
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第四层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">食发鬼×2 小袖之手×2 骨女×1 青蛙瓷器×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第五层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">两面佛×2 山风×2 椒图×1 青蛙瓷器×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第六层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">小鹿男×2 青行灯×1 判官×1 凤凰火×1 青蛙瓷器×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第七层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">天井下×1 鬼使白×2 纸舞×1 般若×1 青蛙瓷器×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第八层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">鸦天狗×2 鬼切×1 犬神×1 万年竹×1 青蛙瓷器×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第九层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">白藏主×1 彼岸花×1 苍风一目连×2 追月神×1 青蛙瓷器×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">第十层</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell">面灵气×1 蟹姬×1 化鲸×3 青蛙瓷器×1</div>
+				</div>
+			</div>
+			
+			<div class="table-row-group chapter">
+				<div class="table-row chapter-header">
+					<div class="table-cell">番外</div>
+					<div class="table-cell"></div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell">一回合</div>
+					<div class="table-cell"> 酒吞童子呱×1 一目连呱×1 妖刀姬呱×1 青行灯呱×1 茨木童子呱×1 小鹿男呱×1</div>
+				</div>
+			</div>
+		</div>
+				
+		<div class="table clue">
+			<div class="table-caption">【神秘线索】</div>
+			<div class="table-row-group chapter">
+				<!-- <div class="table-row chapter-header">
+					<div class="table-cell"></div>
+					<div class="table-cell"></div>
+					<div class="table-cell"></div>
+				</div>
+				-->
+				<div class="table-row">
+					<div class="table-cell clue-cell">水池</div>
+					<div class="table-cell">鲤鱼精</div>
+					<div class="table-cell">第7章 御魂2/3/9</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">樱花树/红色</div>
+					<div class="table-cell">三尾狐</div>
+					<div class="table-cell">第6/18章 御魂1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">单眼/石锤/怪力</div>
+					<div class="table-cell">山童</div>
+					<div class="table-cell">第8/16章 御魂1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">黑镰/短刀</div>
+					<div class="table-cell">鬼使黑</div>
+					<div class="table-cell">第16章 御魂4  妖气封印</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">单眼/石菩萨 金刚经</div>
+					<div class="table-cell">独眼小僧</div>
+					<div class="table-cell">第11章 御魂1/5</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">鬼火/角 财富/幸运</div>
+					<div class="table-cell">座敷童子</div>
+					<div class="table-cell">第2章 御魂3/6</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">花/舞</div>
+					<div class="table-cell">桃花妖</div>
+					<div class="table-cell">第8章 御魂3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">翅膀/羽衣 幼女</div>
+					<div class="table-cell">童女</div>
+					<div class="table-cell">第3/11/12章 御魂2/4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">渔夫/海/胡须/杖</div>
+					<div class="table-cell">海坊主</div>
+					<div class="table-cell">第12章  御魂3  妖气封印</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">纸扇/书生 面具</div>
+					<div class="table-cell">妖狐</div>
+					<div class="table-cell">第7章 御魂2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">鼓/单眼</div>
+					<div class="table-cell">天邪鬼黄</div>
+					<div class="table-cell">第3/5/12章</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">人偶/操纵</div>
+					<div class="table-cell">傀儡师</div>
+					<div class="table-cell">第10章 御魂5</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">锤子/钉耙/剑</div>
+					<div class="table-cell">镰鼬</div>
+					<div class="table-cell">御魂5</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">铃铛/噩梦</div>
+					<div class="table-cell">食梦貘</div>
+					<div class="table-cell">第14章 御魂4/9</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">青皮肤/风筝</div>
+					<div class="table-cell">天邪鬼青</div>
+					<div class="table-cell">第2/5/6/10/11章</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">石/青苔</div>
+					<div class="table-cell">凃壁</div>
+					<div class="table-cell">第4/14章 御魂1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">水球/河流/荷叶</div>
+					<div class="table-cell">河童</div>
+					<div class="table-cell">第7章 御魂2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">蒲公英/治疗</div>
+					<div class="table-cell">萤草</div>
+					<div class="table-cell">御魂2/9/10</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">杖妖艳/红尾</div>
+					<div class="table-cell">三尾狐</div>
+					<div class="table-cell">第6/18章 御魂1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">雉刀/翅膀 面具</div>
+					<div class="table-cell">鸦天狗</div>
+					<div class="table-cell">第3/9/12/17/18章 御魂6</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">二筒/瓷 出千</div>
+					<div class="table-cell">青蛙瓷器</div>
+					<div class="table-cell">第4章 御魂3</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">手鼓/小妖精 可爱</div>
+					<div class="table-cell">蝴蝶精</div>
+					<div class="table-cell">第6/8章 御魂3/8</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">汤碗/琴 牙牙</div>
+					<div class="table-cell">孟婆</div>
+					<div class="table-cell">第9章 御魂5/6</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">剑/雀/屋 守护</div>
+					<div class="table-cell">犬神</div>
+					<div class="table-cell">第10章 御魂4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">柴犬 守护</div>
+					<div class="table-cell">犬神</div>
+					<div class="table-cell">第10章 御魂4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">贝壳/扇子 尾巴</div>
+					<div class="table-cell">椒图</div>
+					<div class="table-cell">妖气封印 御魂3/8/9/10</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">云/鬼面 冥界</div>
+					<div class="table-cell">阎魔</div>
+					<div class="table-cell">御魂6</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">大翅膀/风 扇</div>
+					<div class="table-cell">大天狗</div>
+					<div class="table-cell">第15/18章 御魂4/10</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">羽毛/笛子 扇</div>
+					<div class="table-cell">大天狗</div>
+					<div class="table-cell">第15/18章 御魂4/10</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">翅膀/羽衣 献祭</div>
+					<div class="table-cell">童男</div>
+					<div class="table-cell">第12章 御魂4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">剑/坚甲 石化</div>
+					<div class="table-cell">兵俑</div>
+					<div class="table-cell">第3/10章 御魂2</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">稻草人/咒锥</div>
+					<div class="table-cell">丑时之女</div>
+					<div class="table-cell">第10章 御魂5/7</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">冥界/白 夺命</div>
+					<div class="table-cell">鬼使白</div>
+					<div class="table-cell">第16章 御魂4</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">红鬼/拍屁股</div>
+					<div class="table-cell">天邪鬼赤</div>
+					<div class="table-cell">第4/5/6/7/13/14/15章 御魂1</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">泪珠/雨/伞</div>
+					<div class="table-cell">雨女</div>
+					<div class="table-cell">第4章 御魂6</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">血/蝙蝠</div>
+					<div class="table-cell">吸血姬</div>
+					<div class="table-cell">御魂2层</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">蜡烛/棺材</div>
+					<div class="table-cell">跳跳哥哥</div>
+					<div class="table-cell">第10/12章 御魂5/10 妖气封印</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">水泡/尾巴</div>
+					<div class="table-cell">鲤鱼精</div>
+					<div class="table-cell">第7章 御魂2/3/9</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">骷髅/怨念/剑</div>
+					<div class="table-cell">骨女</div>
+					<div class="table-cell">第10/11/13/17章 御魂5/6 妖气封印</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">石墙</div>
+					<div class="table-cell">涂壁</div>
+					<div class="table-cell">第3/4/5/6/7/8/11/12/14章 御魂1 妖气封印</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">蛊/虫子</div>
+					<div class="table-cell">巫蛊师</div>
+					<div class="table-cell">第6章 御魂6</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell clue-cell">蒲公英 叮~</div>
+					<div class="table-cell">萤草</div>
+					<div class="table-cell">御魂2/9/10</div>
+				</div>
+
+			</div>
+		</div>
+
+	</div>
+	<footer>
+		<div class='msg'>
+		非版权所有，请勿随处发布，侵删。
+		</div>
+	</footer>
+</body>
+
+</html>
