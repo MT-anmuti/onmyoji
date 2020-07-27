@@ -1,8 +1,8 @@
-function search(matchValue) {
+Ôªøfunction search(matchValue) {
 	var searchStr = matchValue || document.querySelector("#searchItem").value,
 		cellList = document.querySelectorAll(".content .table > .table-row-group > .table-row > .table-cell");
 	if (searchStr.indexOf('*') > -1 || searchStr.indexOf('x') > -1) {
-		searchStr = searchStr.split('*').join('°¡').split('x').join('°¡')
+		searchStr = searchStr.split('*').join('√ó').split('x').join('√ó')
 	}
 	removeChildNodesHide(document.querySelector(".content"));
 	resetLightFont();
@@ -68,7 +68,7 @@ function displayChapter() {
 				$currentGroup.classList.remove("hide");
 				var $currentGroupHeader = $currentGroup.querySelector(".table-row.chapter-header"),
 					$currentGroupContent = $currentGroup.querySelectorAll(".table-row:not(.chapter-header)");
-				if ($currentGroupHeader.classList.contains("hide") && $currentGroupContent[0].querySelectorAll(".table-cell")[0].innerHTML.indexOf("ªÿ∫œ") == -1) {
+				if ($currentGroupHeader.classList.contains("hide") && $currentGroupContent[0].querySelectorAll(".table-cell")[0].innerHTML.indexOf("ÂõûÂêà") == -1) {
 					$currentGroupHeader.classList.remove("hide");
 					removeChildNodesHide($currentGroupHeader)
 				} else {
